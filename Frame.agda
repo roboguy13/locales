@@ -221,7 +221,7 @@ module LatticeProps {A} (lattice : Lattice A) where
         (c ⊑ d → e ⊑ r) →
         (a ⊑ b → c ⊑ d) →
         (a ⊑ b → e ⊑ r)
-    _⊢_⨾⟨_⟩_ a b f g x = f (g x)
+    _⊢_⨾⟨_⟩_ e r f g x = f (g x)
 
     _⊢_∎T : ∀ a b →
         a ⊑ b → a ⊑ b
