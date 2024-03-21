@@ -2,7 +2,7 @@
 -- Author: David Young
 --
 -- Description:
---   Working through some exercises in Stone Spaces. This also has a Coq-like tactic notation for doing writing proofs in an arbitrary Heyting algebra.
+--   Working through some exercises in Stone Spaces. This also has a Coq-like tactic notation for writing proofs in an arbitrary Heyting algebra.
 --
 
 open import Data.Product
