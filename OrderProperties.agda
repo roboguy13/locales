@@ -5,8 +5,6 @@ open import Data.Product
 
 module OrderProperties where
 
-  
-  
   module Locales {A} (frame : Frame A) where
   
     open Frame frame
@@ -16,9 +14,12 @@ module OrderProperties where
     open Preorder preorder
   
     open LatticeProperties lattice
-    open import Tactics (preorder)
+    open import Tactics
     open DualLatticeProperties lattice
-  
+
+    open TacticBasics (preorder)
+    open FrameTactics (frame)
+
     open import Data.Empty renaming (⊥ to Void; ⊥-elim to Void-elim)
     open import Data.Unit renaming (⊤ to Unit; tt to unit) hiding (preorder)
     open import Data.Bool
@@ -147,8 +148,6 @@ module OrderProperties where
       (a ⇒ b) ⊑ (a′ ⇒ b)
     ⇒-antitone {a} {a′} {b} p =
       ⇒⊑ (⊑-trans (glb-monotone ⊑-refl p) app-1′)
-  
-    open FrameTactics
   
   
     glb-⊥ : ∀ {a} →

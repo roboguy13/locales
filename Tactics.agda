@@ -4,7 +4,8 @@ open import Relation.Binary.PropositionalEquality hiding (preorder)
 open import Data.Product
 
 module Tactics where
-  module _ {A} (preorder : Preorder A) where
+
+  module TacticBasics {A} (preorder : Preorder A) where
     open Preorder preorder
   
     infixr 2 _⊢_⨾⟨_⟩_
