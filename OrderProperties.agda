@@ -61,14 +61,14 @@ module OrderProperties where
         p1  : glb a (a ⇒ b) ⊑ a
         p1 = proj₁ glb-is-lower-bound
   
-        p2 : glb a (a ⇒ b) ⊑ (a ⇒ b)
-        p2 = proj₂ glb-is-lower-bound
-  
-        p3 : glb (glb a (a ⇒ b)) a ⊑ b
-        p3 = ⊑⇒ p2
-  
         p4 : glb a (a ⇒ b) ⊑ b
-        p4 = ⊑-trans (⊑-trans (eq-⊑ glb-comm) (⊑-trans (eq-⊑ glb-comm) (eq-⊑ (sym glb-a-b-a)))) p3
+        p4 =
+          begin-tactics
+            glb a (a ⇒ b)         ⊢ b       ⨾⟨ rewrite⊢ (eq-⊑ (sym glb-a-b-a) ) ⟩
+            glb (glb a (a ⇒ b)) a ⊢ b       ⨾⟨ ⊑⇒ ⟩
+            glb a (a ⇒ b)         ⊢ a ⇒ b   ⨾⟨ rewrite⊢ (proj₂ glb-is-lower-bound) ⟩
+            (a ⇒ b)               ⊢ (a ⇒ b)
+          ∎T
   
     app-2 : ∀ {a b} →
       glb b (a ⇒ b) ≡ b
@@ -140,14 +140,27 @@ module OrderProperties where
       b ⊑ b′ →
       (a ⇒ b) ⊑ (a ⇒ b′)
     ⇒-monotone {a} {b} {b′} p =
-      ⇒⊑ (⊑-trans app-1′ p)
+      begin-tactics
+        (a ⇒ b)       ⊢ (a ⇒ b′) ⨾⟨ ⇒⊑ ⟩
+        glb (a ⇒ b) a ⊢ b′       ⨾⟨ rewrite⊢ app-1′ ⟩
+        b             ⊢ b′       ⨾⟨ rewrite⊢ p ⟩
+        b′            ⊢ b′
+      ∎T
+      
+      -- ⇒⊑ (⊑-trans app-1′ p)
   
     -- _⇒_ is antitone in its first parameter
     ⇒-antitone : ∀ {a a′ b} →
       a′ ⊑ a →
       (a ⇒ b) ⊑ (a′ ⇒ b)
     ⇒-antitone {a} {a′} {b} p =
-      ⇒⊑ (⊑-trans (glb-monotone ⊑-refl p) app-1′)
+      begin-tactics
+        (a ⇒ b)        ⊢ (a′ ⇒ b) ⨾⟨ ⇒⊑ ⟩
+        glb (a ⇒ b) a′ ⊢ b        ⨾⟨ rewrite⊢ (glb-monotone ⊑-refl p) ⟩
+        glb (a ⇒ b) a  ⊢ b        ⨾⟨ rewrite⊢ app-1′ ⟩
+        b              ⊢ b
+      ∎T
+      -- ⇒⊑ (⊑-trans (glb-monotone ⊑-refl p) app-1′)
   
   
     glb-⊥ : ∀ {a} →
@@ -159,10 +172,19 @@ module OrderProperties where
   
     noncontradict : ∀ {a} →
       glb a (¬ a) ≡ ⊥
-    noncontradict =
+    noncontradict {a} =
       antisym
-        (⊑-trans (eq-⊑ app≡) (proj₂ glb-is-lower-bound))
+        p
         ⊥-is-bottom
+      where
+        p : glb a (¬ a) ⊑ ⊥
+        p =
+          begin-tactics
+            glb a (¬ a) ⊢ ⊥ ⨾⟨ rewrite⊢ (eq-⊑ app≡) ⟩
+            glb a ⊥     ⊢ ⊥ ⨾⟨ rewrite⊢ (proj₂ glb-is-lower-bound) ⟩
+            ⊥           ⊢ ⊥
+          ∎T
+          -- (⊑-trans (eq-⊑ app≡) (proj₂ glb-is-lower-bound))
   
     noncontradict′ : ∀ {a} →
       glb (¬ a) a ≡ ⊥
@@ -181,15 +203,15 @@ module OrderProperties where
     contrapositive⇒ : ∀ {a b} →
       (a ⇒ b) ⊑ ((¬ b) ⇒ (¬ a))
     contrapositive⇒ {a} {b} =
-      ⇒⊑ (⇒⊑ (
-        begin
-          glb (glb (a ⇒ b) (¬ b)) a ⊑⟨ eq-⊑ glb-comm ⟩
-          glb a (glb (a ⇒ b) (¬ b)) ⊑⟨ eq-⊑ glb-assoc ⟩
-          glb (glb a (a ⇒ b)) (¬ b) ⊑⟨ glb-monotone app-1 ⊑-refl ⟩
-          glb b (¬ b) ⊑⟨ eq-⊑ noncontradict ⟩
-          ⊥
-        ∎
-        ))
+      begin-tactics
+        (a ⇒ b)                   ⊢ ((¬ b) ⇒ (¬ a)) ⨾⟨ ⇒⊑ ⟩
+        glb (a ⇒ b) (¬ b)         ⊢ ¬ a             ⨾⟨ ⇒⊑ ⟩
+        glb (glb (a ⇒ b) (¬ b)) a ⊢ ⊥               ⨾⟨ rewrite⊢ (eq-⊑ glb-comm) ⟩
+        glb a (glb (a ⇒ b) (¬ b)) ⊢ ⊥               ⨾⟨ rewrite⊢ (eq-⊑ glb-assoc) ⟩
+        glb (glb a (a ⇒ b)) (¬ b) ⊢ ⊥               ⨾⟨ rewrite⊢ (glb-monotone app-1 ⊑-refl) ⟩
+        glb b (¬ b)               ⊢ ⊥               ⨾⟨ rewrite⊢ (eq-⊑ noncontradict) ⟩
+        ⊥                         ⊢ ⊥
+      ∎T
   
     ¬distr : ∀ {a b} →
       ¬ (lub a b) ≡ glb (¬ a) (¬ b)
@@ -238,14 +260,13 @@ module OrderProperties where
         antisym p ¬¬intro
       where
         p : (¬ ¬ ¬ a) ⊑ (¬ a)
-        p = ⇒⊑ (
-          begin
-            glb (¬ ¬ ¬ a) a           ⊑⟨⟩
-            glb ((¬ ¬ a) ⇒ ⊥) a       ⊑⟨ glb-monotone ⊑-refl ¬¬intro ⟩
-            glb ((¬ ¬ a) ⇒ ⊥) (¬ ¬ a) ⊑⟨ app-1′ ⟩
-            ⊥
-          ∎
-          )
+        p =
+          begin-tactics
+            (¬ ¬ ¬ a)                 ⊢ ¬ a ⨾⟨ ⇒⊑ ⟩
+            glb (¬ ¬ ¬ a) a           ⊢ ⊥   ⨾⟨ rewrite⊢ (glb-monotone ⊑-refl ¬¬intro) ⟩
+            glb ((¬ ¬ a) ⇒ ⊥) (¬ ¬ a) ⊢ ⊥   ⨾⟨ rewrite⊢ app-1′ ⟩
+            ⊥                         ⊢ ⊥
+          ∎T
   
     ⊤⇒ : ∀ {a} →
       ⊤ ⇒ a ≡ a

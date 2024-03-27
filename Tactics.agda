@@ -24,6 +24,8 @@ module Tactics where
         a ⊑ b → a ⊑ b
     _⊢_∎T _ _ x = x
   
+    -- Start a "block" of tactics (which will get composed together).
+    -- The idea is that we should eventually end with something of the form `a ⊢ a`
     begin-tactics_ : ∀ {a b c : A} →
         (a ⊑ a → b ⊑ c) →
         b ⊑ c
