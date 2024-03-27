@@ -233,19 +233,20 @@ module OrderProperties where
         q₁ {x} {y} {z} r s = proj₂ lub-is-lub z (r , s)
   
         q : glb (¬ a) (¬ b) ⊑ (¬ lub a b)
-        q = ⇒⊑ (
-          begin
-            glb (glb (¬ a) (¬ b)) (lub a b)                         ⊑⟨ eq-⊑ glb-distr-lub ⟩
-            lub (glb (glb (¬ a) (¬ b)) a) (glb (glb (¬ a) (¬ b)) b) ⊑⟨ lub-monotone (glb-monotone (eq-⊑ glb-comm) ⊑-refl) ⊑-refl ⟩
-            lub (glb (glb (¬ b) (¬ a)) a) (glb (glb (¬ a) (¬ b)) b) ⊑⟨ lub-monotone (eq-⊑ (sym glb-assoc)) ⊑-refl ⟩
-            lub (glb (¬ b) (glb (¬ a) a)) (glb (glb (¬ a) (¬ b)) b) ⊑⟨ lub-monotone (glb-monotone ⊑-refl (eq-⊑ noncontradict′)) ⊑-refl ⟩
-            lub (glb (¬ b) ⊥) (glb (glb (¬ a) (¬ b)) b)             ⊑⟨ lub-monotone (proj₂ glb-is-lower-bound) ⊑-refl ⟩
-            lub ⊥ (glb (glb (¬ a) (¬ b)) b)                         ⊑⟨ lub-monotone ⊑-refl (eq-⊑ (sym glb-assoc)) ⟩
-            lub ⊥ (glb (¬ a) (glb (¬ b) b))                         ⊑⟨ lub-monotone ⊑-refl (glb-monotone ⊑-refl (eq-⊑ noncontradict′)) ⟩
-            lub ⊥ (glb (¬ a) ⊥)                                     ⊑⟨ lub-monotone ⊑-refl (proj₂ glb-is-lower-bound) ⟩
-            lub ⊥ ⊥                                                 ⊑⟨ eq-⊑ lub-idem ⟩
-            ⊥
-          ∎)
+        q =
+          begin-tactics
+            glb (¬ a) (¬ b)                                         ⊢ ¬ lub a b ⨾⟨ ⇒⊑ ⟩
+            glb (glb (¬ a) (¬ b)) (lub a b)                         ⊢ ⊥         ⨾⟨ rewrite⊢ (eq-⊑ glb-distr-lub) ⟩
+            lub (glb (glb (¬ a) (¬ b)) a) (glb (glb (¬ a) (¬ b)) b) ⊢ ⊥         ⨾⟨ rewrite⊢ (lub-monotone (glb-monotone (eq-⊑ glb-comm) ⊑-refl) ⊑-refl) ⟩
+            lub (glb (glb (¬ b) (¬ a)) a) (glb (glb (¬ a) (¬ b)) b) ⊢ ⊥         ⨾⟨ rewrite⊢ (lub-monotone (eq-⊑ (sym glb-assoc)) ⊑-refl) ⟩
+            lub (glb (¬ b) (glb (¬ a) a)) (glb (glb (¬ a) (¬ b)) b) ⊢ ⊥         ⨾⟨ rewrite⊢ (lub-monotone (glb-monotone ⊑-refl (eq-⊑ noncontradict′)) ⊑-refl) ⟩
+            lub (glb (¬ b) ⊥) (glb (glb (¬ a) (¬ b)) b)             ⊢ ⊥         ⨾⟨ rewrite⊢ (lub-monotone (proj₂ glb-is-lower-bound) ⊑-refl) ⟩
+            lub ⊥ (glb (glb (¬ a) (¬ b)) b)                         ⊢ ⊥         ⨾⟨ rewrite⊢ (lub-monotone ⊑-refl (eq-⊑ (sym glb-assoc))) ⟩
+            lub ⊥ (glb (¬ a) (glb (¬ b) b))                         ⊢ ⊥         ⨾⟨ rewrite⊢ (lub-monotone ⊑-refl (glb-monotone ⊑-refl (eq-⊑ noncontradict′))) ⟩
+            lub ⊥ (glb (¬ a) ⊥)                                     ⊢ ⊥         ⨾⟨ rewrite⊢ (lub-monotone ⊑-refl (proj₂ glb-is-lower-bound)) ⟩
+            lub ⊥ ⊥                                                 ⊢ ⊥         ⨾⟨ rewrite⊢ (eq-⊑ lub-idem) ⟩
+            ⊥                                                       ⊢ ⊥
+          ∎T
   
     ¬⊥ : (¬ ⊥) ≡ ⊤
     ¬⊥ = antisym ⊤-is-top (⇒⊑ (proj₂ glb-is-lower-bound))
