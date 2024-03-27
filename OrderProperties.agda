@@ -300,19 +300,23 @@ module OrderProperties where
   
         p₂ : (¬ ¬ (glb a b)) ⊑ (¬ ¬ a)
         p₂ =
-          begin
-            (¬ ¬ (glb a b))     ⊑⟨⟩
-            ((glb a b ⇒ ⊥) ⇒ ⊥) ⊑⟨ ⇒-antitone (⇒-antitone (proj₁ glb-is-lower-bound)) ⟩
-            (¬ ¬ a)
-          ∎
+          begin-tactics
+            (¬ ¬ glb a b)       ⊢ (¬ ¬ a)       ⨾⟨⟩
+            ((glb a b ⇒ ⊥) ⇒ ⊥) ⊢ ((a ⇒ ⊥) ⇒ ⊥) ⨾⟨ ⇒-antitone ⟩
+            (a ⇒ ⊥)             ⊢ (glb a b ⇒ ⊥) ⨾⟨ ⇒-antitone ⟩
+            glb a b             ⊢ a             ⨾⟨ rewrite⊢ (proj₁ glb-is-lower-bound) ⟩
+            a                   ⊢ a
+          ∎T
   
         p₃ : (¬ ¬ (glb a b)) ⊑ (¬ ¬ b)
         p₃ =
-          begin
-            (¬ ¬ (glb a b))     ⊑⟨⟩
-            ((glb a b ⇒ ⊥) ⇒ ⊥) ⊑⟨ ⇒-antitone (⇒-antitone (proj₂ glb-is-lower-bound)) ⟩
-            (¬ ¬ b)
-          ∎
+          begin-tactics
+            (¬ ¬ glb a b)       ⊢ ¬ ¬ b         ⨾⟨⟩
+            ((glb a b ⇒ ⊥) ⇒ ⊥) ⊢ ((b ⇒ ⊥) ⇒ ⊥) ⨾⟨ ⇒-antitone ⟩
+            (b ⇒ ⊥)             ⊢ glb a b ⇒ ⊥   ⨾⟨ ⇒-antitone ⟩
+            glb a b             ⊢ b             ⨾⟨ rewrite⊢ (proj₂ glb-is-lower-bound) ⟩
+            b                   ⊢ b
+          ∎T
   
         p : (¬ ¬ (glb a b)) ⊑ glb (¬ ¬ a) (¬ ¬ b)
         p = p₁ p₂ p₃

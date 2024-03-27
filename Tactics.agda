@@ -9,6 +9,7 @@ module Tactics where
     open Preorder preorder
   
     infixr 2 _⊢_⨾⟨_⟩_
+    infixr 2 _⊢_⨾⟨⟩_
     infix  3 _⊢_∎T
     infix  1 begin-tactics_
   
@@ -18,6 +19,12 @@ module Tactics where
         (a ⊑ b → c ⊑ d) →
         (a ⊑ b → e ⊑ r)
     _⊢_⨾⟨_⟩_ e r f g x = f (g x)
+
+    -- This allows us to "rewrite" a goal to something definitionally equal. We would just do this to make a proof easier to read.
+    _⊢_⨾⟨⟩_ : ∀ {a b} c d →
+      (a ⊑ b → c ⊑ d) →
+      (a ⊑ b → c ⊑ d)
+    _⊢_⨾⟨⟩_ _ _ p = p
   
     -- The "do nothing" tactic
     _⊢_∎T : ∀ a b →
