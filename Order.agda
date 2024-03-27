@@ -148,6 +148,192 @@ record Frame (A : Set) : Set₁ where
     Lub-distr-glb : ∀ {I} {a} (B : I → A) →
       glb a (Lub B) ≡ Lub (λ i → glb a (B i))
 
+  -- Heyting implication
+  _⇒_ : A → A → A
+  _⇒_ u v = Lub {∃[ x ] (glb x u ⊑ v)} λ i → proj₁ i
+
+  
+module LatticeProperties {A} (lattice : Lattice A) where
+
+  open Lattice lattice
+  open PartialOrder porder
+  open Preorder preorder
+
+  _⊔_ = lub
+  _⊓_ = glb
+
+  lub-idem : ∀ {a} →
+    lub a a ≡ a
+  lub-idem {a} = antisym (proj₂ lub-is-lub a (⊑-refl , ⊑-refl)) (proj₂ lub-is-upper-bound)
+
+  lub-monotone : ∀ {a a′ b b′} →
+    a ⊑ a′ →
+    b ⊑ b′ →
+    lub a b ⊑ lub a′ b′
+  lub-monotone {a} {a′} {b} {b′} a⊑a′ b⊑b′ = universal lub-upper-bound
+    where
+      universal : ∀ {z} → is-upper-bound preorder a b z → lub a b ⊑ z
+      universal {z} = proj₂ lub-is-lub z
+
+      lub-upper-bound :
+        a ⊑ lub a′ b′
+          ×
+        b ⊑ lub a′ b′
+      lub-upper-bound = ⊑-trans a⊑a′ (proj₁ lub-is-upper-bound) ,
+                        ⊑-trans b⊑b′ (proj₂ lub-is-upper-bound)
+
+  lub-comm : ∀ {a b} →
+    lub a b ≡ lub b a
+  lub-comm {a} {b} = antisym (universal-lub-a-b (a⊑lub-b-a , b⊑lub-b-a)) (universal-lub-b-a (b⊑lub-a-b , a⊑lub-a-b))
+    where
+      universal-lub-a-b : ∀ {z} → is-upper-bound preorder a b z → lub a b ⊑ z
+      universal-lub-a-b {z} = proj₂ lub-is-lub z
+
+      universal-lub-b-a : ∀ {z} → is-upper-bound preorder b a z → lub b a ⊑ z
+      universal-lub-b-a {z} = proj₂ lub-is-lub z
+
+      a⊑lub-b-a : a ⊑ lub b a
+      a⊑lub-b-a = proj₂ lub-is-upper-bound
+
+      b⊑lub-b-a : b ⊑ lub b a
+      b⊑lub-b-a = proj₁ lub-is-upper-bound
+
+      a⊑lub-a-b : a ⊑ lub a b
+      a⊑lub-a-b = proj₁ lub-is-upper-bound
+
+      b⊑lub-a-b : b ⊑ lub a b
+      b⊑lub-a-b = proj₂ lub-is-upper-bound
+
+  lub-assoc : ∀ {a b c} →
+    lub a (lub b c) ≡ lub (lub a b) c
+  lub-assoc {a} {b} {c} = antisym (universal-1 p) (universal-2 q)
+    where
+      universal-1 : ∀ {z} → is-upper-bound preorder a (lub b c) z → lub a (lub b c) ⊑ z
+      universal-1 {z} = proj₂ lub-is-lub z
+
+      universal-2 : ∀ {z} → is-upper-bound preorder (lub a b) c z → lub (lub a b) c ⊑ z
+      universal-2 {z} = proj₂ lub-is-lub z
+
+      universal-3 : ∀ {z} → is-upper-bound preorder a b z → lub a b ⊑ z
+      universal-3 {z} = proj₂ lub-is-lub z
+
+      universal-4 : ∀ {z} → is-upper-bound preorder b c z → lub b c ⊑ z
+      universal-4 {z} = proj₂ lub-is-lub z
+
+      p0 : is-upper-bound preorder b c (lub (lub a b) c)
+      p0 =
+        let x , y = lub-is-upper-bound {lub a b} {c}
+            w , r = lub-is-upper-bound {a} {b}
+        in
+        ⊑-trans r x , y
+
+      p : is-upper-bound preorder a (lub b c) (lub (lub a b) c)
+      p =
+        let x , _ = lub-is-upper-bound {lub a b} {c}
+        in
+        ⊑-trans (proj₁ lub-is-upper-bound) x , universal-4 p0
+
+
+      q0 : is-upper-bound preorder a b (lub a (lub b c))
+      q0 =
+        let x , y = lub-is-upper-bound {a} {lub b c}
+            w , r = lub-is-upper-bound {b} {c}
+        in
+        proj₁ lub-is-upper-bound , ⊑-trans w y
+
+      q : is-upper-bound preorder (lub a b) c (lub a (lub b c))
+      q =
+        let _ , x = lub-is-upper-bound {a} {lub b c}
+            _ , y = lub-is-upper-bound {b} {c}
+        in
+        universal-3 q0 , ⊑-trans y x
+
+  absorb-1 : ∀ {a b} → lub a (glb a b) ≡ a
+  absorb-1 {a} {b} =
+    antisym (⊑-trans p1 (subst (λ z → z ⊑ a) (sym lub-idem) ⊑-refl))
+            (proj₁ lub-is-upper-bound)
+    where
+      p : glb a b ⊑ a
+      p = proj₁ glb-is-lower-bound
+
+      p1 : lub a (glb a b) ⊑ lub a a
+      p1 = lub-monotone ⊑-refl p
+
+
+module DualLatticeProperties {A} (lattice : Lattice A) where
+  open Lattice lattice
+  open PartialOrder porder
+  open Preorder preorder
+
+  Op : Preorder A
+  Op =
+    record { _⊑_ = λ a b → b ⊑ a ; ⊑-refl = ⊑-refl ; ⊑-trans = λ p q → ⊑-trans q p }
+
+  Op-PartialOrder : PartialOrder A
+  Op-PartialOrder = record { preorder = Op ; antisym = λ a b → antisym b a }
+
+  Op-Lattice : Lattice A
+  Op-Lattice = record { porder = Op-PartialOrder ; lub-exists = glb-exists ; glb-exists = lub-exists }
+
+  open LatticeProperties -- (Op-Lattice)
+
+  glb-op : ∀ {a b} →
+    glb a b ≡ Lattice.lub Op-Lattice a b
+  glb-op = refl
+
+  glb-idem : ∀ {a} →
+    glb a a ≡ a
+  glb-idem = lub-idem Op-Lattice
+
+  glb-monotone : ∀ {a a′ b b′} →
+    a ⊑ a′ →
+    b ⊑ b′ →
+    glb a b ⊑ glb a′ b′
+  glb-monotone = lub-monotone Op-Lattice
+
+  glb-comm : ∀ {a b} →
+    glb a b ≡ glb b a
+  glb-comm = lub-comm Op-Lattice
+
+  glb-assoc : ∀ {a b c} →
+    glb a (glb b c) ≡ glb (glb a b) c
+  glb-assoc {a} {b} {c} = lub-assoc Op-Lattice
+
+  eq-⊑ : ∀ {a b} →
+      a ≡ b →
+      a ⊑ b
+  eq-⊑ refl = ⊑-refl
+  
+
+  absorb-2 : ∀ {a b} → glb a (lub a b) ≡ a
+  absorb-2 = absorb-1 Op-Lattice
+
+  lub-glb⊑ : ∀ {a b c} →
+    lub a (glb b c) ⊑ glb (lub a b) (lub a c)
+  lub-glb⊑ {a} {b} {c} = universal upper-bound
+    where
+      universal : ∀ {z} → is-upper-bound Op (lub a b) (lub a c) z → z ⊑ glb (lub a b) (lub a c)
+      universal {z} = proj₂ glb-is-glb z
+
+      glb-b-c⊑b : glb b c ⊑ b
+      glb-b-c⊑b =
+        let (x , _) , _ = glb-is-glb {b} {c}
+        in
+        x
+
+      glb-b-c⊑c : glb b c ⊑ c
+      glb-b-c⊑c =
+        let (_ , x) , _ = glb-is-glb {b} {c}
+        in
+        x
+
+      upper-bound : is-upper-bound Op (lub a b) (lub a c) (lub a (glb b c))
+      upper-bound = lub-monotone lattice ⊑-refl glb-b-c⊑b , lub-monotone lattice ⊑-refl glb-b-c⊑c
+
+  glb-a-b-a : ∀ {a b} →
+    glb (glb a b) a ≡ glb a b
+  glb-a-b-a {a} {b} =
+    trans (sym glb-assoc) (trans (cong (glb a) glb-comm) (trans glb-assoc (cong₂ glb glb-idem refl)))
 
 -- record Frame-morphism {A B : Set} (F-A : Frame A) (F-B : Frame B) : Set₁ where
 --   open Frame F-A renaming (Lub to A-Lub; distr-lattice to A-distr-lattice)
