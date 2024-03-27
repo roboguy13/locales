@@ -116,25 +116,30 @@ module Tactics where
       glb a ⊤ ≡ a
     glb-⊤ {a} = antisym (proj₁ glb-is-lower-bound) (proj₂ glb-is-glb a (⊑-refl , ⊤-is-top))
 
-    -- z, (a ⇒ b) ⊢ b   --->   z ⊢ a
+
+    -- Tactic descriptions in comments are given in the form:
+    --    <initial proof state>   --->   <proof state after tactic>
+    -- This is reversed from the type signature (because of the way tactics are composed).
+
+    -- z ⊓ (a ⇒ b) ⊢ b   --->   z ⊢ a
     apply : ∀ {a b z} →
         z ⊑ a →
         glb z (a ⇒ b) ⊑ b
     apply p = ⊑-trans (glb-monotone p ⊑-refl) app-1
 
-    -- a ⊢ b   --->   ⊢ a ⇒ b
+    -- ⊢ a ⇒ b   --->   a ⊢ b
     intro : ∀ {a b} →
         a ⊑ b →
         ⊤ ⊑ (a ⇒ b)
     intro p = ⇒⊑ (⊑-trans (proj₂ glb-is-lower-bound) p)
 
-    -- a, b ⊢ c   --->   a ⊢ b ⇒ c
+    -- a ⊢ b ⇒ c   --->   a ⊓ b ⊢ c
     intro-glb : ∀ {a b c} →
         glb a b ⊑ c →
         a ⊑ (b ⇒ c)
     intro-glb = ⇒⊑
 
-    -- ⊢ a ⇒ b   --->   a ⊢ b
+    -- a ⊢ b   --->   ⊢ a ⇒ b
     generalize : ∀ {a b} →
         ⊤ ⊑ (a ⇒ b) →
         a ⊑ b
